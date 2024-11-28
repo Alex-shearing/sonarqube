@@ -23,6 +23,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import javax.annotation.CheckForNull;
 import javax.naming.NamingEnumeration;
 import javax.naming.NamingException;
 import javax.naming.directory.Attributes;
@@ -59,21 +60,23 @@ public class DefaultLdapGroupsProvider implements LdapGroupsProvider {
     return getGroups(context.serverKey(), context.username());
   }
 
+  @CheckForNull
   private Collection<String> getGroups(String serverKey, String username) {
     checkPrerequisites(username);
-    Set<String> groups = new HashSet<>();
     if (groupMappings.containsKey(serverKey)) {
-      SearchResult searchResult = searchUserGroups(username, serverKey);
-      if (searchResult != null) {
-        try {
-          NamingEnumeration<SearchResult> result = groupMappings
-            .get(serverKey)
-            .createSearch(contextFactories.get(serverKey), searchResult).find();
-          groups.addAll(mapGroups(serverKey, result));
-        } catch (NamingException e) {
-          LOG.debug(e.getMessage(), e);
-          throw new LdapException(format("Unable to retrieve groups for user %s in server with key <%s>", username, serverKey), e);
-        }
+      return null;
+    }
+    Set<String> groups = new HashSet<>();
+    SearchResult searchResult = searchUserGroups(username, serverKey);
+    if (searchResult != null) {
+      try {
+        NamingEnumeration<SearchResult> result = groupMappings
+          .get(serverKey)
+          .createSearch(contextFactories.get(serverKey), searchResult).find();
+        groups.addAll(mapGroups(serverKey, result));
+      } catch (NamingException e) {
+        LOG.debug(e.getMessage(), e);
+        throw new LdapException(format("Unable to retrieve groups for user %s in server with key <%s>", username, serverKey), e);
       }
     }
     return groups;

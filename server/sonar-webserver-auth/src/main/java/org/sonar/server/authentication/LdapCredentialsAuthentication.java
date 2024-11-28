@@ -126,7 +126,9 @@ public class LdapCredentialsAuthentication {
     if (ldapGroupsProvider != null) {
       LdapGroupsProvider.Context context = new LdapGroupsProvider.Context(serverKey, userLogin, request);
       Collection<String> groups = ldapGroupsProvider.doGetGroups(context);
-      userIdentityBuilder.setGroups(new HashSet<>(groups));
+      if (groups != null) {
+        userIdentityBuilder.setGroups(new HashSet<>(groups));
+      }
     }
     return userRegistrar.register(
       UserRegistration.builder()
